@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="da">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Person Galleri</title>
+    <style>
+      img {
+        box-sizing: border-box;
+        width: 100%;
+        height: auto;
+      }
+
+      section {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 30px;
+      }
+
+      article {
+        border: 1px solid orange;
+        border-radius: 10px;
+        padding: 1rem;
+      }
+
+      .valgt {
+        background-color: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Alle</h1>
+      <nav>
+        <button data-troende="alle" class="valgt">Alle</button>
+        <button data-troende="ja">Troende</button>
+        <button data-troende="nej">Ikke troende</button>
+      </nav>
+    </header>
+    <section></section>
+    <template>
+      <article>
+        <h2></h2>
+        <img src="" alt="" />
+        <p></p>
+      </article>
+    </template>
+
+    <script>
+      const container = document.querySelector("section");
+      const template = document.querySelector("template").content;
+      const header = document.querySelector("header h1");
+
+      const url = "https://tema7-ea04.restdb.io/rest/medlemmer";
+
+      const options = {
+        headers: {
+          "x-apikey": "61fcf7e53f215f310a37be5c",
+        },
+      };
+
+      let data;
+      let filter = "alle";
+
+      const filterKnapper = document.querySelectorAll("nav button");
+      filterKnapper.forEach((knap) =>
+        knap.addEventListener("click", filtrerPersoner)
+      );
+
+      function filtrerPersoner() {
+        filter = this.dataset.troende;
+
+        document.querySelector(".valgt").classList.remove("valgt");
+        this.classList.add("valgt");
+
+        vis(data);
+
+        header.textContent = this.textContent;
+      }
+
+      async function hentData() {
+        const resspons = await fetch(url, options);
+        const json = await resspons.json();
+
+        data = json;
+        vis(data);
+      }
+
+      function vis(data) {
+        container.textContent = "";
+        data.forEach((person) => {
+          if (filter == person.troende || filter == "alle") {
+            const klon = template.cloneNode(true);
+            klon.querySelector("h2").textContent = person.fornavn;
+            klon.querySelector("img").src = "faces/" + person.profilbillede;
+            klon.querySelector("p").textContent = person.email;
+
+            klon.querySelector("article").addEventListener("click", () => {
+              location.href = `0.2-detalje.html?id=${person._id}`;
+            });
+            container.appendChild(klon);
+          }
+        });
+      }
+
+      hentData();
+    </script>
+  </body>
+</html>
